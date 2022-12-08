@@ -2,6 +2,12 @@ package main
 
 import "math"
 
+// Rectangle has a method called Area that returns a float64, so it satisfies Shape
+// Circle has a method called Area that returns a float64, so it also satisfies Shape
+type Shape interface {
+	Area() float64
+}
+
 type Rectangle struct {
 	Width  float64
 	Height float64
