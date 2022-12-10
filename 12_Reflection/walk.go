@@ -4,20 +4,29 @@ import "reflect"
 
 func walk(x interface{}, fn func(input string)) {
 	// we make assumptions here about the value passed in
-	val := reflect.ValueOf(x)
+	val := getValue(x)
 
 	// iterate through each field in val
 	for i := 0; i < val.NumField(); i++ {
-		// access Field i
 		field := val.Field(i)
 
-		// check the type of Field i
-		if field.Kind() == reflect.String {
+		switch field.Kind() {
+		case reflect.String:
 			fn(field.String())
-		}
-
-		if field.Kind() == reflect.Struct {
+		case reflect.Struct:
 			walk(field.Interface(), fn)
 		}
 	}
+}
+
+func getValue(x interface{}) reflect.Value {
+	val := reflect.ValueOf(x)
+
+	// can't use NumField on a pointer Value
+	// need to extract the underlying value before we can do that by using Elem()
+	if val.Kind() == reflect.Ptr {
+		val = val.Elem()
+	}
+
+	return val
 }

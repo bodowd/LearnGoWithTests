@@ -55,6 +55,14 @@ func TestWalk(t *testing.T) {
 			},
 			[]string{"Chris", "London"},
 		},
+		{
+			"pointers to things",
+			&Person{
+				"Chris",
+				Profile{33, "London"},
+			},
+			[]string{"Chris", "London"},
+		},
 	}
 
 	for _, test := range cases {
@@ -62,6 +70,7 @@ func TestWalk(t *testing.T) {
 			var got []string
 
 			walk(test.Input, func(input string) {
+				// we use the anonymous function to append input to the got slice
 				got = append(got, input)
 			})
 
