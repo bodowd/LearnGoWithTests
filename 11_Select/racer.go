@@ -2,24 +2,27 @@ package racer
 
 import (
 	"net/http"
-	"time"
 )
 
 func Racer(a, b string) (winner string) {
-
-	aDuration := measureResponseTime(a)
-
-	bDuration := measureResponseTime(b)
-
-	if aDuration < bDuration {
+	// select lets you wait on multiple channels
+	// the first one to send a value "wins" and the code underneath the case is executed
+	select {
+	case <-ping(a):
 		return a
+	case <-ping(b):
+		return b
 	}
-	return b
 
 }
 
-func measureResponseTime(url string) time.Duration {
-	start := time.Now()
-	http.Get(url)
-	return time.Since(start)
+func ping(url string) chan struct{} {
+	ch := make(chan struct{})
+
+	// sends a signal into the channel when http.Get(url) completes
+	go func() {
+		http.Get(url)
+		close(ch)
+	}()
+	return ch
 }
