@@ -10,7 +10,14 @@ func walk(x interface{}, fn func(input string)) {
 	for i := 0; i < val.NumField(); i++ {
 		// access Field i
 		field := val.Field(i)
-		// call the String method. May not actually have one if it's not a string
-		fn(field.String())
+
+		// check the type of Field i
+		if field.Kind() == reflect.String {
+			fn(field.String())
+		}
+
+		if field.Kind() == reflect.Struct {
+			walk(field.Interface(), fn)
+		}
 	}
 }
