@@ -8,22 +8,23 @@ import (
 
 type PlayerStore interface {
 	GetPlayerScore(name string) (int, bool)
+	RecordWin(name string)
 }
 
 type PlayerServer struct {
 	store PlayerStore
 }
 
-type StubPlayerStore struct {
-	scores map[string]int
-}
-
-func (s *StubPlayerStore) GetPlayerScore(name string) (int, bool) {
-	score, ok := s.scores[name]
-	return score, ok
-}
-
 func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodPost:
+		p.processWin(w)
+	case http.MethodGet:
+		p.showScore(w, r)
+	}
+}
+
+func (p *PlayerServer) showScore(w http.ResponseWriter, r *http.Request) {
 	player := strings.TrimPrefix(r.URL.Path, "/players/")
 
 	score, ok := p.store.GetPlayerScore(player)
@@ -34,4 +35,9 @@ func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Fprint(w, score)
 
+}
+
+func (p *PlayerServer) processWin(w http.ResponseWriter) {
+	p.store.RecordWin("Bob")
+	w.WriteHeader(http.StatusAccepted)
 }
