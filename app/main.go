@@ -7,8 +7,8 @@ import (
 
 type InMemoryPlayerStore struct{}
 
-func (i *InMemoryPlayerStore) GetPlayerScore(name string) int {
-	return 123
+func (i *InMemoryPlayerStore) GetPlayerScore(name string) (int, bool) {
+	return 123, true
 }
 
 func main() {
