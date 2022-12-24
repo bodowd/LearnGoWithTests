@@ -32,46 +32,46 @@ func TestGETPlayers(t *testing.T) {
 
 	server := &PlayerServer{&store}
 
-	t.Run("returns Pepper's score", func(t *testing.T) {
-		request := newGetScoreRequest("Pepper")
-		// httptest has a spy already made for us called ResponseRecorder
-		// which NewRecorder() returns
-		response := httptest.NewRecorder()
+	tests := []struct {
+		name               string
+		player             string
+		expectedHTTPStatus int
+		expectedScore      string
+	}{
+		{
+			name:               "Returns Pepper's score",
+			player:             "Pepper",
+			expectedHTTPStatus: http.StatusOK,
+			expectedScore:      "20",
+		},
+		{
+			name:               "Returns Floyd's score",
+			player:             "Floyd",
+			expectedHTTPStatus: http.StatusOK,
+			expectedScore:      "10",
+		},
+		{
+			name:               "Returns 404 on missing players",
+			player:             "Apollo",
+			expectedHTTPStatus: http.StatusNotFound,
+			expectedScore:      "0",
+		},
+	}
 
-		server.ServeHTTP(response, request)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			request := newGetScoreRequest(tt.player)
+			response := httptest.NewRecorder()
 
-		got := response.Body.String()
-		want := "20"
+			server.ServeHTTP(response, request)
 
-		assertStatus(t, response.Code, http.StatusOK)
-		assertResponseBody(t, got, want)
-	})
+			got := response.Body.String()
+			want := tt.expectedScore
 
-	t.Run("returns Floyd's score", func(t *testing.T) {
-		request := newGetScoreRequest("Floyd")
-		response := httptest.NewRecorder()
-
-		server.ServeHTTP(response, request)
-
-		got := response.Body.String()
-		want := "10"
-
-		assertStatus(t, response.Code, http.StatusOK)
-		assertResponseBody(t, got, want)
-	})
-
-	t.Run("returns 404 on missing players", func(t *testing.T) {
-		request := newGetScoreRequest("Apollo")
-		response := httptest.NewRecorder()
-
-		server.ServeHTTP(response, request)
-
-		got := response.Code
-		want := http.StatusNotFound
-
-		assertStatus(t, got, want)
-
-	})
+			assertStatus(t, response.Code, tt.expectedHTTPStatus)
+			assertResponseBody(t, got, want)
+		})
+	}
 }
 
 func TestStoreWins(t *testing.T) {
