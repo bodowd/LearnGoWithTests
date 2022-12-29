@@ -13,9 +13,8 @@ type CLI struct {
 
 func (cli *CLI) PlayPoker() {
 	// bufio.Scanner reads the input from the io.Reader
-	reader := cli.in
-	reader.Scan()
-	cli.playerStore.RecordWin(extractWinner(reader.Text()))
+	text := cli.readLine()
+	cli.playerStore.RecordWin(extractWinner(text))
 }
 
 func extractWinner(userInput string) string {
@@ -27,4 +26,9 @@ func NewCLI(store PlayerStore, in io.Reader) *CLI {
 		playerStore: store,
 		in:          bufio.NewScanner(in),
 	}
+}
+
+func (cli *CLI) readLine() string {
+	cli.in.Scan()
+	return cli.in.Text()
 }
