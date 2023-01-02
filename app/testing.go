@@ -8,6 +8,7 @@ import (
 	"os"
 	"reflect"
 	"testing"
+	"time"
 )
 
 type StubPlayerStore struct {
@@ -126,4 +127,22 @@ func getLeagueFromResponse(t testing.TB, body io.Reader) []Player {
 
 	league, _ := NewLeague(body)
 	return league
+}
+
+type SpyBlindAlerter struct {
+	alerts []struct {
+		scheduledAt time.Duration
+		amount      int
+	}
+}
+
+func (s *SpyBlindAlerter) ScheduleAlertAt(duration time.Duration, amount int) {
+	s.alerts = append(s.alerts, struct {
+		scheduledAt time.Duration
+		amount      int
+	}{duration, amount})
+}
+
+type BlindAlerter interface {
+	ScheduleAlertAt(duration time.Duration, amount int)
 }
